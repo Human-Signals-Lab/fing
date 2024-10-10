@@ -11,6 +11,7 @@ import time, os
 import math
 import machine
 from lsm6dsox import LSM6DSOX
+import VL53L1X
 from machine import Pin, SPI, LED
 
 # Initialize the LSM6DSOX sensor
@@ -61,10 +62,11 @@ while True:
     #accel_z = math.sqrt(accel_z**2)
 
     # if LED is on, keep waiting
-    if flg_sleep == 1:
-        flg_sleep = 0
-        start_time = current_time
-        continue
+    #if flg_sleep == 1:
+    #    flg_sleep = 0
+    #    start_time = current_time
+    #    continue
+
     # aggregate IMU for every acc_window_t ms to improve robustness
     if time.ticks_diff(current_time, start_time) <= acc_window_t:
         window_acc_z_tmp.append(accel_z)
@@ -87,7 +89,6 @@ while True:
     window_gyro_x.append(gyro_x_tmp)
     window_gyro_y.append(gyro_y_tmp)
     window_gyro_z.append(gyro_z_tmp)
-    start_time = current_time
     window_acc_z_tmp = []
     window_acc_x_tmp = []
     window_acc_y_tmp = []
@@ -121,19 +122,23 @@ while True:
                 tap_wait = 0
                 time.sleep_ms(1000)
                 img = sensor.snapshot()
-                img.save("/tmp/%d.jpeg" % tap_count)
-                flg_sleep = 1
+                file_name = time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())
+                img.save("/tmp/%s.jpeg" % file_name)
                 led.off()
 
+    #print('{}\t{}'.format(window_acc_z[0],window_acc_z[0]), file=open('/tmp/aaa.logs','a+'))
+
+    start_time = time.ticks_ms()
 
     #print("Accelerometer: x:{:>8.3f} y:{:>8.3f} z:{:>8.3f}".format(accel_x, accel_y, accel_z))
     #print("Gyroscope:     x:{:>8.3f} y:{:>8.3f} z:{:>8.3f}".format(gyro_x, gyro_y, gyro_z))
     #print("")
 
-
+"""
 with open('/tmp/aaa.csv','w') as file:
         #for line in file:
             file.write(str(window_acc_z))
             #line_Str=line_Str.rstrip('\n')
             #line_Str=line_Str.rstrip('\r')
 file.close()
+"""
