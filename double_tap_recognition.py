@@ -5,7 +5,7 @@ import sensor, image, time, math
 sensor.reset()
 sensor.set_pixformat(sensor.RGB565)
 sensor.set_framesize(sensor.QVGA)
-sensor.skip_frames(time = 2000)
+sensor.skip_frames(time = 1000)
 
 clock = time.clock()
 
@@ -45,9 +45,15 @@ def detect_double_tap():
         # Check if we have two taps within the time limit
         if len(tap_times) == 2:
             print("Double tap detected!")
+            led = LED("LED_BLUE")
+            led.on()
+            img = sensor.snapshot()
+            img.save("/tmp/double_tap_%d.jpeg" % tap_times[1])
+            time.sleep_ms(1000)
             tap_times.clear()  # Reset for the next detection
+            led.off()
 
         time.sleep(1/SAMPLE_RATE)  # Simulate sampling rate
 
-detect_double_tap()
+#detect_double_tap()
 
